@@ -3,7 +3,7 @@ import React, { Suspense, useEffect, useState} from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import CabbanaModel from './CabbanaModel'; /* highlight-line */
-import { Box, Typography} from '@mui/material';
+import { Avatar, Box, Typography} from '@mui/material';
 import { PrettoSlider } from './components/CustomSlider';
 import { useGLTF } from '@react-three/drei'
 
@@ -29,13 +29,16 @@ export default function App() {
     angle: 0,
   })
 
+  const [styleParams, setModelStyleParams] = useState({
+    structure_color: 0,
+    structure_effect: 0,
+    blade_color: 0,
+    blade_effect: 0,
+  })
+
   const [cameraInfo, setCameraInfo] = useState(defaultCameraInfo)
   
   const { nodes: initialNodes, materials } = useGLTF('/CabbanaModel_initial.glb')
-  console.log('nodes=============>', materials);
-
-
-  // let initialNodes = undefined;
 
   const handleWidth = (ev, newValue) => {
     setModelDimensions((prev) => ({
@@ -64,6 +67,28 @@ export default function App() {
     }))
   }
 
+  const handleStructureColor = (ev, newValue) => {
+    setModelStyleParams((prev)=>({
+      ...prev, structure_color: newValue
+    }))
+  }
+  const handleStructureEffect = (ev, newValue) => {
+    setModelStyleParams((prev)=>({
+      ...prev, structure_effect: newValue
+    }))
+  }
+  const handleBladeEffect = (ev, newValue) => {
+    setModelStyleParams((prev)=>({
+      ...prev, blade_effect: newValue
+    }))
+  }
+    const handleBladeColor = (ev, newValue) => {
+    setModelStyleParams((prev)=>({
+      ...prev, blade_color: newValue
+    }))
+  }
+
+
    return (
     <>
       <Canvas
@@ -75,7 +100,8 @@ export default function App() {
           fov: cameraInfo.fov }}
         
          style={{
-            backgroundColor: '#111a21',
+            // backgroundColor: '#111a21'
+            background: 'white',
             width: '100vw',
             height: '100vh',
          }}
@@ -87,6 +113,7 @@ export default function App() {
             <CabbanaModel position={[0.025, -0.9, 0]} 
               modelDimensions = {modelDimensions}
               initialNodes = {initialNodes}
+              styleParams = {styleParams}
             />
          </Suspense>
          <OrbitControls />
@@ -130,6 +157,46 @@ export default function App() {
           max={SizeLimit.angle.max}
           onChange={handleBladeAngle}
         />
+        <Typography sx={{textAlign: 'center'}}>Color</Typography>
+        <Typography >structure</Typography>
+        <PrettoSlider
+          valueLabelDisplay="auto"
+          aria-label="pretto angle slider"
+          defaultValue={styleParams.structure_color}
+          min={0}
+          max={3}
+          onChange={handleStructureColor}
+        />
+        <Typography >blade</Typography>
+        <PrettoSlider
+          valueLabelDisplay="auto"
+          aria-label="pretto angle slider"
+          defaultValue={styleParams.blade_color}
+          min={0}
+          max={3}
+          onChange={handleBladeColor}
+        />
+        <Typography sx={{textAlign: 'center'}}>Effect</Typography>
+        <Typography >structure</Typography>
+        <PrettoSlider
+          valueLabelDisplay="auto"
+          aria-label="pretto angle slider"
+          defaultValue={styleParams.structure_effect}
+          min={0}
+          max={3}
+          onChange={handleStructureEffect}
+        />
+        <Typography >blade</Typography>
+        <PrettoSlider
+          valueLabelDisplay="auto"
+          aria-label="pretto angle slider"
+          defaultValue={styleParams.blade_effect}
+          min={0}
+          max={3}
+          onChange={handleBladeEffect}
+        />
+        <Avatar alt="Remy Sharp" src="Wood067_PREVIEW.jpg" />
+        <Avatar alt="Remy Sharp" src="Wood067_PREVIEW.jpg" />
       </Box>
     </>
    );

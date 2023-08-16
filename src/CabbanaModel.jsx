@@ -7,15 +7,26 @@ import React, { useEffect, useState } from 'react'
 import { useGLTF } from '@react-three/drei'
 import { SizeLimit } from './App';
 import { getNodeSize, getRadFromAngle} from './helper'
-
+import * as THREE from 'three'
+import { TextureLoader } from 'three/src/loaders/TextureLoader'
+import { useLoader } from '@react-three/fiber'
 
 let render_children = [];
+const color_list = ['red', 'blue', 'green', 'yellow'];
+let structure_map, blade_map, structure_color, blade_color;
+let effect_flag = 0;
 
 export default function Model(props) {
 
-  const {modelDimensions, initialNodes}  = props;
+  const {modelDimensions, initialNodes, styleParams}  = props;
   const [renderFlag, setRenderFlag] = useState(false);
+  const map = useLoader(TextureLoader, [
+    'Planks037A_1K_Color.jpg',
+    'Wood027_1K_Color.jpg',
+    'Wood060_1k_Color.jpg',
+    'Wood067_1k_Color.jpg'
 
+  ])
   const {nodes, materials } = useGLTF('/CabbanaModel.glb')
   const blade_delta = {
     x : nodes.blade2.position.x - nodes.blade1.position.x,
@@ -25,10 +36,6 @@ export default function Model(props) {
   const foot_size = getNodeSize(nodes.foot1);;
   const corner_size = getNodeSize(nodes.corner1);
   const blade_margine = Math.abs(nodes.beam2.position.x - nodes.blade1.position.x);
-  Object.keys(nodes).forEach((nodeKey) => {
-    const node = nodes[nodeKey];
-    node.parent = nodes.Cabbana;
-  });
 
   useEffect(()=>{
     make_one_box();
@@ -94,7 +101,7 @@ export default function Model(props) {
       });
       render_children.pop("middleseperator1");
     }
-    const direction_x_children = ["beam4", "beam6", "middleseperator2"];
+    // const direction_x_children = ["beam4", "beam6", "middleseperator2"];
     const middle_children = ["beam5", "middleseperator1", "column1_w_c", "column8_w_c", "foot1_w_c", "foot8_w_c", "column6", "foot2", "foot7", "foot6", "corner6", "coltop019", "coltop022", "coltop024", "coltop027", "blade5", "blade6", "blade5left", "blade6left", "blade5right", "blade6right"];
     const opposite_children = ["beam7", "column1", "column8", "foot1", "foot8", "corner1", "corner8", "coltop026", "coltop028", "blade3", "blade4", "blade3left", "blade4left", "blade3right", "blade4right"];
     const standard_o_size = getNodeSize(initialNodes.beam1);
@@ -106,20 +113,6 @@ export default function Model(props) {
     const ratio_z = standard_new_len_z/c_size.x;
     nodes.beam1.scale.set(nodes.beam1.scale.x, nodes.beam1.scale.y, nodes.beam1.scale.z * ratio_z)
     nodes.beam6.scale.set(nodes.beam6.scale.x, nodes.beam6.scale.y, nodes.beam6.scale.z * ratio_z)
-    // Object.keys(nodes).forEach((nodeKey) => {
-    //   const node = nodes[nodeKey];
-      
-    //   if (!!direction_x_children.includes(node.name)) {
-    //     const o_node = initialNodes[nodeKey];
-    //     const c_size = getNodeSize(node)
-    //     const o_size = getNodeSize(o_node)
-    //     const o_delta = o_size.x - standard_o_size.x / 2;
-    //     const ratio_z = (standard_new_len_z / 2 + o_delta) / c_size.x;
-    //     node.scale.set(node.scale.x, node.scale.y, node.scale.z * ratio_z);
-    //     const new_change = (standard_new_len_z / 2 + o_delta) - c_size.x;
-    //     node.position.set(node.position.x + new_change / 2, node.position.y, node.position.z);
-    //   }
-    // })
     
     nodes.beam1.position.set(nodes.beam1.position.x + delta_z/2, nodes.beam1.position.y, nodes.beam1.position.z);
     nodes.beam6.position.set(nodes.beam6.position.x + delta_z/2, nodes.beam6.position.y, nodes.beam6.position.z);
@@ -135,47 +128,6 @@ export default function Model(props) {
     setRenderFlag((prev)=>!prev);
   }, [modelDimensions.width])
   
-  // useEffect(()=>{
-  //   const direction_x_children = ["beam4", "beam6", "middleseperator2"];
-  //   const middle_children = ["beam5", "middleseperator1", "column2", "column7", "column6", "foot2", "foot7", "foot6", "corner6", "coltop019", "coltop022", "coltop024", "coltop027", "blade5", "blade6", "blade5left", "blade6left", "blade5right", "blade6right"];
-  //   const opposite_children = ["beam7", "column1", "column8", "foot1", "foot8", "corner1", "corner8", "coltop026", "coltop028", "blade3", "blade4", "blade3left", "blade4left", "blade3right", "blade4right"];
-  //   const standard_o_size = getNodeSize(initialNodes.beam1);
-  //   const standard_o_len_t = standard_o_size.x + 2 * corner_size.x
-  //   const standard_c_size = getNodeSize(nodes.beam1);
-  //   const standard_new_len_z = (modelDimensions.width / SizeLimit.width.min) * standard_o_len_t - 2 * corner_size.x;
-  //   const delta_z = standard_new_len_z - standard_c_size.x;
-  //   const c_size = getNodeSize(nodes.beam1);
-  //   const ratio_z = standard_new_len_z/c_size.x;
-  //   nodes.beam1.scale.set(nodes.beam1.scale.x, nodes.beam1.scale.y, nodes.beam1.scale.z * ratio_z)
-  //   Object.keys(nodes).forEach((nodeKey) => {
-  //     const node = nodes[nodeKey];
-      
-  //     if (!!direction_x_children.includes(node.name)) {
-  //       const o_node = initialNodes[nodeKey];
-  //       const c_size = getNodeSize(node)
-  //       const o_size = getNodeSize(o_node)
-  //       const o_delta = o_size.x - standard_o_size.x / 2;
-  //       const ratio_z = (standard_new_len_z / 2 + o_delta) / c_size.x;
-  //       node.scale.set(node.scale.x, node.scale.y, node.scale.z * ratio_z);
-  //       const new_change = (standard_new_len_z / 2 + o_delta) - c_size.x;
-  //       node.position.set(node.position.x + new_change / 2, node.position.y, node.position.z);
-  //     }
-  //   })
-    
-  //   nodes.beam1.position.set(nodes.beam1.position.x + delta_z/2, nodes.beam1.position.y, nodes.beam1.position.z);
-  //   nodes.beam6.position.set(nodes.beam6.position.x + delta_z/2, nodes.beam6.position.y, nodes.beam6.position.z);
-  //   Object.keys(nodes).forEach((nodeKey) => {
-  //     const node = nodes[nodeKey];
-  //     if (opposite_children.includes(node.name)) {
-  //       node.position.set(node.position.x + delta_z, node.position.y, node.position.z);
-  //     } else if (middle_children.includes(node.name)) {
-  //       node.position.set(node.position.x + delta_z / 2, node.position.y, node.position.z);
-  //     }
-  //   });
-  //   cloneBaldes();
-  //   setRenderFlag((prev)=>!prev);
-  // }, [modelDimensions.width])
-
   useEffect(()=>{
     const direction_y_children = ["beam2", "beam3", "beam5", "beam7", "middleseperator1"]
     const direction_y_sec_box = ["beam3", "beam5", "blade5", "blade6"];
@@ -228,6 +180,32 @@ export default function Model(props) {
     setRenderFlag((prev)=>!prev);
   }, [modelDimensions.angle])
 
+  useEffect(()=> {
+    effect_flag = 0;
+    structure_color = color_list[styleParams.structure_color];
+    setRenderFlag((prev)=>!prev);
+  }, [styleParams.structure_color])
+  
+  useEffect(()=> {
+    effect_flag = 0;
+    blade_color = color_list[styleParams.blade_color];
+    setRenderFlag((prev)=>!prev);
+  }, [styleParams.blade_color])
+  
+  
+  useEffect(()=> {
+    effect_flag = 1;
+    structure_map = map[styleParams.structure_effect];
+    setRenderFlag((prev)=>!prev);
+  }, [styleParams.structure_effect])
+  
+  useEffect(()=> {
+    effect_flag = 1;
+    setRenderFlag((prev)=>!prev);
+    blade_map = map[styleParams.blade_effect];
+  }, [styleParams.blade_effect])
+
+
   function cloneBaldes() {
     
     Object.keys(nodes).forEach((nodeKey) => {
@@ -243,8 +221,6 @@ export default function Model(props) {
       clone_blade_one_box("blade1", x_distance_beam2_7 / 2);
       clone_blade_one_box("blade3", x_distance_beam2_7 / 2, -1);
     }
-    // clone_blade_one_box("blade5", x_distance_beam2_7 / 2, -1);
-    // clone_blade_one_box("middleseperator2on1", x_distance_beam2_7 / 2);
   }
 
   function clone_blade_one_box(mesh_name, distance, direct = 1) {
@@ -287,9 +263,6 @@ export default function Model(props) {
     nodes.beam6.scale.set(nodes.beam6.scale.x,nodes.beam6.scale.y, nodes.beam6.scale.z * ratio);
     nodes.beam6.position.set(nodes.beam6.position.x - delta / 2, nodes.beam6.position.y, nodes.beam6.position.z);
     initialNodes.beam6.copy(nodes.beam6);
-    // const x_distance_beam2_7 = Math.abs(nodes.beam2.position.x - nodes.beam7.position.x);
-    // clone_blade_one_box("blade1", x_distance_beam2_7 / 2);
-    // clone_blade_one_box("blade3", x_distance_beam2_7 / 2, -1);
   }
 
 
@@ -300,19 +273,68 @@ export default function Model(props) {
         {
           Object.keys(nodes).map((nodeKey) => {
             const node = nodes[nodeKey];
-            const materialName = node.material?.name;
-            
             if (nodeKey === 'Cabbana' || nodeKey === 'Scene' || !(render_children.includes(nodeKey) || nodeKey.includes("_c"))) return <></> 
-            return (
-              <mesh 
-                geometry={node.geometry} 
-                material={materials[materialName]} 
-                position={[node.position.x, node.position.y, node.position.z]} 
-                rotation={[node.rotation._x, node.rotation._y, node.rotation._z]} 
-                scale={[node.scale.x, node.scale.y, node.scale.z]}
-                parent={nodes.Cabbana}
-              />          
-            )
+            if (effect_flag == 0) {
+              if (nodeKey.includes("blade")){
+                return (
+                  <mesh 
+                  geometry={node.geometry}
+                  material={new THREE.MeshStandardMaterial({
+                    color: blade_color, 
+                    transparent: false, opacity: 0.5
+                  })}
+                  position={[node.position.x, node.position.y, node.position.z]} 
+                  rotation={[node.rotation._x, node.rotation._y, node.rotation._z]} 
+                  scale={[node.scale.x, node.scale.y, node.scale.z]}
+                  parent={nodes.Cabbana}
+                  />          
+                  )
+              } else {
+                return (
+                  <mesh 
+                    geometry={node.geometry}
+                    material={new THREE.MeshStandardMaterial({
+                      color: structure_color, 
+                      transparent: false, opacity: 0.5
+                    })}
+                    position={[node.position.x, node.position.y, node.position.z]} 
+                    rotation={[node.rotation._x, node.rotation._y, node.rotation._z]} 
+                    scale={[node.scale.x, node.scale.y, node.scale.z]}
+                    parent={nodes.Cabbana}
+                    />          
+                    )
+              }
+            } else {
+              if (nodeKey.includes("blade")){
+                return (
+                  <mesh 
+                  geometry={node.geometry}
+                  material={new THREE.MeshStandardMaterial({
+                    map: blade_map,
+                    transparent: false, opacity: 0.5
+                  })}
+                  position={[node.position.x, node.position.y, node.position.z]} 
+                  rotation={[node.rotation._x, node.rotation._y, node.rotation._z]} 
+                  scale={[node.scale.x, node.scale.y, node.scale.z]}
+                  parent={nodes.Cabbana}
+                  />          
+                  )
+              } else {
+                return (
+                  <mesh 
+                    geometry={node.geometry}
+                    material={new THREE.MeshStandardMaterial({
+                      map: structure_map,
+                      transparent: false, opacity: 0.5
+                    })}
+                    position={[node.position.x, node.position.y, node.position.z]} 
+                    rotation={[node.rotation._x, node.rotation._y, node.rotation._z]} 
+                    scale={[node.scale.x, node.scale.y, node.scale.z]}
+                    parent={nodes.Cabbana}
+                    />          
+                    )
+              }
+            }
           })
         }
        </group>
