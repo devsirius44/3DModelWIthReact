@@ -1,7 +1,7 @@
 
-import React, { Suspense, useState, useRef} from 'react';
+import React, { Suspense, useState} from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Box, OrbitControls, Plane} from '@react-three/drei';
+import { Box, OrbitControls} from '@react-three/drei';
 import CabbanaModel from './CabbanaModel'; /* highlight-line */
 import { Box as MuiBox, Typography} from '@mui/material';
 import { PrettoSlider } from './components/CustomSlider';
@@ -18,14 +18,14 @@ export const SizeLimit = {
 
 const defaultCameraInfo = {
   x:0, 
-  y:10, 
-  z:10,
+  y:15, 
+  z:15,
   fov: 45 
 }
 
 export default function App() {
   const [modelDimensions, setModelDimensions] = useState({
-    width: 120,
+    width: 121,
     depth: 118,
     height: 98,
     angle: 0,
@@ -114,20 +114,15 @@ export default function App() {
          }}
       >
          <ambientLight intensity={0.5} />
-         <pointLight
-          castShadow
-          position={[10, 10, 10]}
-         />
          <directionalLight
            intensity={0.5}
+           position={[2, 7, 2]}
            castShadow
-           shadow-mapSize-height={512}
-           shadow-mapSize-width={512}
+           shadow-camera-left = {-20}
+           shadow-camera-right = {20}
+           shadow-camera-bottom = {-20}
+           shadow-camera-top = {20}
          />
-          <directionalLight
-            position={[3.3, 1.0, 4.4]}
-            castShadow={true}
-          />
 
          <Suspense fallback={null}>
             <CabbanaModel position={[-0.025, -0.9, 0]} 
@@ -146,33 +141,33 @@ export default function App() {
           <Box
           receiveShadow
            position={[-15, 0, 0]}
-           scale={[0.01, 15, 30]}
+           scale={[0.01, 12, 30]}
            >
-            <meshBasicMaterial transparent opacity={0.3} color="#b1c1c8" />
+            <meshBasicMaterial transparent opacity={0.1} color="#b1c1c8" />
           </Box>
           <Box
            position={[15, 0, 0]}
-           scale={[0.01, 15, 30]}
+           scale={[0.01, 12, 30]}
            receiveShadow
            >
-            <meshBasicMaterial transparent opacity={0.3} color="#b1c1c8" />
+            <meshBasicMaterial transparent opacity={0.1} color="#b1c1c8" />
           </Box>
            <Box
            position={[0, 0, 15]}
-           scale={[30, 15, 0.01]}
+           scale={[30, 12, 0.01]}
            receiveShadow
            >
-          <meshBasicMaterial transparent opacity={0.3} color="#b1c1c8" />
+          <meshBasicMaterial transparent opacity={0.1} color="#b1c1c8" />
           </Box>
           <Box
            position={[0, 0, -15]}
-           scale={[30, 15, 0.01]}
+           scale={[30, 12, 0.01]}
            receiveShadow
            >
-            <meshBasicMaterial transparent opacity={0.3} color="#b1c1c8" />
+            <meshBasicMaterial transparent opacity={0.1} color="#b1c1c8" />
           </Box>
          <OrbitControls
-          maxDistance={15}
+          maxDistance={25}
           minDistance={2}
           minPolarAngle={ 0 } // Minimum vertical angle in radians
           maxPolarAngle={Math.PI / 2.1} // Maximum vertical angle in radians

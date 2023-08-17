@@ -15,7 +15,6 @@ const ImageAvatar = (props) => {
                 //     backgroundImage: img ?? "./Planks037A_1K_Color",
                 // }
             }}
-            // startIcon={img}d
             onClick = {onClick}
         >
         </Button>

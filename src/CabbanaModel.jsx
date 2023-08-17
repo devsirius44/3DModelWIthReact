@@ -70,7 +70,7 @@ export default function Model(props) {
   }, [modelDimensions.height])
   
   useEffect(()=>{
-    if (modelDimensions.width > 200 && !Object.keys(nodes).includes("column1_w_c")){
+    if (modelDimensions.width > 120 && !Object.keys(nodes).includes("column1_w_c")){
       let column1_c = nodes.column1.clone();
       column1_c.name = "column1_w_c";
       column1_c.position.set(nodes.beam1.position.x, nodes.column1.position.y, nodes.column1.z);
@@ -93,7 +93,7 @@ export default function Model(props) {
       initialNodes[foot8_c.name] = initialNodes.foot8
       render_children.push("middleseperator1");
       nodes.middleseperator1.position.set(nodes.beam1.position.x, nodes.beam2.position.y, nodes.beam1.position.z - (initialNodes.beam1.position.z - initialNodes.middleseperator1.position.z))
-    } else if (modelDimensions.width <= 200 && Object.keys(nodes).includes("column1_w_c")) {
+    } else if (modelDimensions.width <= 120 && Object.keys(nodes).includes("column1_w_c")) {
       Object.keys(nodes).forEach((nodeKey) => {
         if (nodeKey.includes("_w_c")) delete nodes[nodeKey];
       });
@@ -213,7 +213,7 @@ export default function Model(props) {
     });
 
     const x_distance_beam2_7 = Math.abs(nodes.beam2.position.x - nodes.beam7.position.x);
-    if (modelDimensions.width <= 200){
+    if (modelDimensions.width <= 120){
       clone_blade_one_box("blade1", x_distance_beam2_7 - blade_delta.x * 2);
     }else{
       clone_blade_one_box("blade1", x_distance_beam2_7 / 2);
