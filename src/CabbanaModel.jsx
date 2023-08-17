@@ -4,7 +4,7 @@ Command: npx gltfjsx@6.2.10 cabbana_last_withUV.glb
 */
 
 import React, { useEffect, useState } from 'react'
-import { useGLTF } from '@react-three/drei'
+import { useGLTF} from '@react-three/drei'
 import { SizeLimit } from './App';
 import { getNodeSize, getRadFromAngle} from './helper'
 import * as THREE from 'three'
@@ -12,7 +12,6 @@ import { TextureLoader } from 'three/src/loaders/TextureLoader'
 import { useLoader } from '@react-three/fiber'
 
 let render_children = [];
-const color_list = ['red', 'blue', 'green', 'yellow'];
 let structure_map, blade_map, structure_color, blade_color;
 let effect_flag = 0;
 
@@ -36,7 +35,6 @@ export default function Model(props) {
   const foot_size = getNodeSize(nodes.foot1);;
   const corner_size = getNodeSize(nodes.corner1);
   const blade_margine = Math.abs(nodes.beam2.position.x - nodes.blade1.position.x);
-
   useEffect(()=>{
     make_one_box();
     setRenderFlag((prev) => !prev);
@@ -99,9 +97,9 @@ export default function Model(props) {
       Object.keys(nodes).forEach((nodeKey) => {
         if (nodeKey.includes("_w_c")) delete nodes[nodeKey];
       });
+      
       render_children.pop("middleseperator1");
     }
-    // const direction_x_children = ["beam4", "beam6", "middleseperator2"];
     const middle_children = ["beam5", "middleseperator1", "column1_w_c", "column8_w_c", "foot1_w_c", "foot8_w_c", "column6", "foot2", "foot7", "foot6", "corner6", "coltop019", "coltop022", "coltop024", "coltop027", "blade5", "blade6", "blade5left", "blade6left", "blade5right", "blade6right"];
     const opposite_children = ["beam7", "column1", "column8", "foot1", "foot8", "corner1", "corner8", "coltop026", "coltop028", "blade3", "blade4", "blade3left", "blade4left", "blade3right", "blade4right"];
     const standard_o_size = getNodeSize(initialNodes.beam1);
@@ -182,13 +180,13 @@ export default function Model(props) {
 
   useEffect(()=> {
     effect_flag = 0;
-    structure_color = color_list[styleParams.structure_color];
+    structure_color = styleParams.structure_color;
     setRenderFlag((prev)=>!prev);
   }, [styleParams.structure_color])
   
   useEffect(()=> {
     effect_flag = 0;
-    blade_color = color_list[styleParams.blade_color];
+    blade_color = styleParams.blade_color;
     setRenderFlag((prev)=>!prev);
   }, [styleParams.blade_color])
   
@@ -201,8 +199,8 @@ export default function Model(props) {
   
   useEffect(()=> {
     effect_flag = 1;
-    setRenderFlag((prev)=>!prev);
     blade_map = map[styleParams.blade_effect];
+    setRenderFlag((prev)=>!prev);
   }, [styleParams.blade_effect])
 
 
@@ -221,6 +219,8 @@ export default function Model(props) {
       clone_blade_one_box("blade1", x_distance_beam2_7 / 2);
       clone_blade_one_box("blade3", x_distance_beam2_7 / 2, -1);
     }
+    move_to_center();
+
   }
 
   function clone_blade_one_box(mesh_name, distance, direct = 1) {
@@ -263,13 +263,26 @@ export default function Model(props) {
     nodes.beam6.scale.set(nodes.beam6.scale.x,nodes.beam6.scale.y, nodes.beam6.scale.z * ratio);
     nodes.beam6.position.set(nodes.beam6.position.x - delta / 2, nodes.beam6.position.y, nodes.beam6.position.z);
     initialNodes.beam6.copy(nodes.beam6);
+
+  }
+
+  function move_to_center() {
+    const delta_x = nodes.beam1.position.x;
+    const delta_y = nodes.beam2.position.y;
+    const delta_z = nodes.foot1.position.z;
+    Object.keys(nodes).forEach((nodeKey) => {
+      nodes[nodeKey].position.set(nodes[nodeKey].position.x - delta_x,
+        nodes[nodeKey].position.y - delta_y,
+        nodes[nodeKey].position.z - delta_z
+        )
+    });
   }
 
 
 
   return (
     <group {...props} dispose={null}>
-      <group position={[0, 1.252, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={0.001}>
+      <group castShadow receiveShadow position={[0, 1.252, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={0.001}>
         {
           Object.keys(nodes).map((nodeKey) => {
             const node = nodes[nodeKey];
@@ -278,15 +291,17 @@ export default function Model(props) {
               if (nodeKey.includes("blade")){
                 return (
                   <mesh 
-                  geometry={node.geometry}
-                  material={new THREE.MeshStandardMaterial({
+                    geometry={node.geometry}
+                    material={new THREE.MeshStandardMaterial({
                     color: blade_color, 
                     transparent: false, opacity: 0.5
-                  })}
-                  position={[node.position.x, node.position.y, node.position.z]} 
-                  rotation={[node.rotation._x, node.rotation._y, node.rotation._z]} 
-                  scale={[node.scale.x, node.scale.y, node.scale.z]}
-                  parent={nodes.Cabbana}
+                    })}
+                    castShadow
+                    receiveShadow
+                    position={[node.position.x, node.position.y, node.position.z]} 
+                    rotation={[node.rotation._x, node.rotation._y, node.rotation._z]} 
+                    scale={[node.scale.x, node.scale.y, node.scale.z]}
+                    parent={nodes.Cabbana}
                   />          
                   )
               } else {
@@ -297,6 +312,8 @@ export default function Model(props) {
                       color: structure_color, 
                       transparent: false, opacity: 0.5
                     })}
+                    castShadow
+                    receiveShadow
                     position={[node.position.x, node.position.y, node.position.z]} 
                     rotation={[node.rotation._x, node.rotation._y, node.rotation._z]} 
                     scale={[node.scale.x, node.scale.y, node.scale.z]}
@@ -313,6 +330,8 @@ export default function Model(props) {
                     map: blade_map,
                     transparent: false, opacity: 0.5
                   })}
+                  castShadow
+                  receiveShadow
                   position={[node.position.x, node.position.y, node.position.z]} 
                   rotation={[node.rotation._x, node.rotation._y, node.rotation._z]} 
                   scale={[node.scale.x, node.scale.y, node.scale.z]}
@@ -327,6 +346,8 @@ export default function Model(props) {
                       map: structure_map,
                       transparent: false, opacity: 0.5
                     })}
+                    castShadow
+                    receiveShadow
                     position={[node.position.x, node.position.y, node.position.z]} 
                     rotation={[node.rotation._x, node.rotation._y, node.rotation._z]} 
                     scale={[node.scale.x, node.scale.y, node.scale.z]}
@@ -334,6 +355,7 @@ export default function Model(props) {
                     />          
                     )
               }
+              
             }
           })
         }

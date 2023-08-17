@@ -1,24 +1,26 @@
 
-import React, { Suspense, useEffect, useState} from 'react';
+import React, { Suspense, useState, useRef} from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { Box, OrbitControls, Plane} from '@react-three/drei';
 import CabbanaModel from './CabbanaModel'; /* highlight-line */
-import { Avatar, Box, Typography} from '@mui/material';
+import { Box as MuiBox, Typography} from '@mui/material';
 import { PrettoSlider } from './components/CustomSlider';
 import { useGLTF } from '@react-three/drei'
+import ColorAvatar from './components/ColorAvatar'
+import ImageAvatar from './components/ImageAvatar'
 
 export const SizeLimit = {
-  width: { min: 96, max: 469 },
+  width: { min: 96, max: 350 },
   depth: { min: 94, max: 276 },
   height: { min: 98, max: 200 },
   angle: {min: 0, max: 90}
 }
 
 const defaultCameraInfo = {
-  x:2, 
-  y:0, 
-  z:12.25,
-  fov: 70 
+  x:0, 
+  y:10, 
+  z:10,
+  fov: 45 
 }
 
 export default function App() {
@@ -30,9 +32,9 @@ export default function App() {
   })
 
   const [styleParams, setModelStyleParams] = useState({
-    structure_color: 0,
+    structure_color: '#a1a1a0',
     structure_effect: 0,
-    blade_color: 0,
+    blade_color: '#a1a1a0',
     blade_effect: 0,
   })
 
@@ -40,6 +42,7 @@ export default function App() {
   
   const { nodes: initialNodes, materials } = useGLTF('/CabbanaModel_initial.glb')
 
+  
   const handleWidth = (ev, newValue) => {
     setModelDimensions((prev) => ({
       ...prev, width: newValue
@@ -67,31 +70,36 @@ export default function App() {
     }))
   }
 
-  const handleStructureColor = (ev, newValue) => {
+  const handleStructureColor = (newValue) => {
     setModelStyleParams((prev)=>({
       ...prev, structure_color: newValue
     }))
   }
-  const handleStructureEffect = (ev, newValue) => {
+  const handleStructureEffect = (newValue) => {
     setModelStyleParams((prev)=>({
       ...prev, structure_effect: newValue
     }))
   }
-  const handleBladeEffect = (ev, newValue) => {
+  const handleBladeEffect = (newValue) => {
     setModelStyleParams((prev)=>({
       ...prev, blade_effect: newValue
     }))
   }
-    const handleBladeColor = (ev, newValue) => {
+    const handleBladeColor = (newValue) => {
     setModelStyleParams((prev)=>({
       ...prev, blade_color: newValue
     }))
   }
 
 
+  const handleclick = (colorStr)=> {
+    console.log('colorStr: ', colorStr)
+  }
    return (
     <>
+  
       <Canvas
+          shadows
           camera={{ position: [
             cameraInfo.x, 
             cameraInfo.y, 
@@ -100,25 +108,77 @@ export default function App() {
           fov: cameraInfo.fov }}
         
          style={{
-            // backgroundColor: '#111a21'
-            background: 'white',
+            background: '#a4b0b2',
             width: '100vw',
             height: '100vh',
          }}
       >
-         <ambientLight intensity={1.25} />
-         <ambientLight intensity={0.1} />
-         <directionalLight intensity={0.4} />
+         <ambientLight intensity={0.5} />
+         <pointLight
+          castShadow
+          position={[10, 10, 10]}
+         />
+         <directionalLight
+           intensity={0.5}
+           castShadow
+           shadow-mapSize-height={512}
+           shadow-mapSize-width={512}
+         />
+          <directionalLight
+            position={[3.3, 1.0, 4.4]}
+            castShadow={true}
+          />
+
          <Suspense fallback={null}>
-            <CabbanaModel position={[0.025, -0.9, 0]} 
+            <CabbanaModel position={[-0.025, -0.9, 0]} 
               modelDimensions = {modelDimensions}
               initialNodes = {initialNodes}
               styleParams = {styleParams}
             />
          </Suspense>
-         <OrbitControls />
+         <Box
+            receiveShadow
+            position={[0, -1.25, 0]}
+            scale={[30, 3, 30]}
+            >
+          <meshStandardMaterial color="#d0d0d0"/>
+          </Box>
+          <Box
+          receiveShadow
+           position={[-15, 0, 0]}
+           scale={[0.01, 15, 30]}
+           >
+            <meshBasicMaterial transparent opacity={0.3} color="#b1c1c8" />
+          </Box>
+          <Box
+           position={[15, 0, 0]}
+           scale={[0.01, 15, 30]}
+           receiveShadow
+           >
+            <meshBasicMaterial transparent opacity={0.3} color="#b1c1c8" />
+          </Box>
+           <Box
+           position={[0, 0, 15]}
+           scale={[30, 15, 0.01]}
+           receiveShadow
+           >
+          <meshBasicMaterial transparent opacity={0.3} color="#b1c1c8" />
+          </Box>
+          <Box
+           position={[0, 0, -15]}
+           scale={[30, 15, 0.01]}
+           receiveShadow
+           >
+            <meshBasicMaterial transparent opacity={0.3} color="#b1c1c8" />
+          </Box>
+         <OrbitControls
+          maxDistance={15}
+          minDistance={2}
+          minPolarAngle={ 0 } // Minimum vertical angle in radians
+          maxPolarAngle={Math.PI / 2.1} // Maximum vertical angle in radians
+        />
       </Canvas>
-      <Box style={{backgroundColor: 'white', position: 'absolute', top: 20, right: 20, width: '300px', padding: '20px', zIndex: 9999 }}>
+      <MuiBox style={{backgroundColor: 'white', position: 'absolute', top: 20, right: 20, width: '300px', padding: '20px', zIndex: 9999 }}>
         <Typography sx={{textAlign: 'center'}}>Dimensions</Typography>
         <Typography >width</Typography>
         <PrettoSlider
@@ -159,45 +219,40 @@ export default function App() {
         />
         <Typography sx={{textAlign: 'center'}}>Color</Typography>
         <Typography >structure</Typography>
-        <PrettoSlider
-          valueLabelDisplay="auto"
-          aria-label="pretto angle slider"
-          defaultValue={styleParams.structure_color}
-          min={0}
-          max={3}
-          onChange={handleStructureColor}
-        />
+        <MuiBox>
+          <ColorAvatar color={'#a1a1a0'} onClick={()=>handleStructureColor('#a1a1a0')}/>
+          <ColorAvatar color={'#363d43'} onClick={()=>handleStructureColor('#363d43')}/>
+          <ColorAvatar color={'#442f29'} onClick={()=>handleStructureColor('#442f29')}/>
+          <ColorAvatar color={'#e9e0d2'} onClick={()=>handleStructureColor('#e9e0d2')}/>
+          <ColorAvatar color={'#0e0e10'} onClick={()=>handleStructureColor('#0e0e10')}/>
+          <ColorAvatar color={'#f1f0ea'} onClick={()=>handleStructureColor('#f1f0ea')}/>
+        </MuiBox>
         <Typography >blade</Typography>
-        <PrettoSlider
-          valueLabelDisplay="auto"
-          aria-label="pretto angle slider"
-          defaultValue={styleParams.blade_color}
-          min={0}
-          max={3}
-          onChange={handleBladeColor}
-        />
+        <MuiBox>
+          <ColorAvatar color={'#a1a1a0'} onClick={()=>handleBladeColor('#a1a1a0')}/>
+          <ColorAvatar color={'#363d43'} onClick={()=>handleBladeColor('#363d43')}/>
+          <ColorAvatar color={'#442f29'} onClick={()=>handleBladeColor('#442f29')}/>
+          <ColorAvatar color={'#e9e0d2'} onClick={()=>handleBladeColor('#e9e0d2')}/>
+          <ColorAvatar color={'#0e0e10'} onClick={()=>handleBladeColor('#0e0e10')}/>
+          <ColorAvatar color={'#f1f0ea'} onClick={()=>handleBladeColor('#f1f0ea')}/>
+        </MuiBox>
         <Typography sx={{textAlign: 'center'}}>Effect</Typography>
         <Typography >structure</Typography>
-        <PrettoSlider
-          valueLabelDisplay="auto"
-          aria-label="pretto angle slider"
-          defaultValue={styleParams.structure_effect}
-          min={0}
-          max={3}
-          onChange={handleStructureEffect}
-        />
+        <MuiBox>
+          <ImageAvatar img={'Planks037A_1K_Color.jpg'} onClick={()=>handleStructureEffect(0)}/>
+          <ImageAvatar img={'Wood027_1K_Color.jpg'} onClick={()=>handleStructureEffect(1)}/>
+          <ImageAvatar img={'Wood060_1k_Color.jpg'} onClick={()=>handleStructureEffect(2)}/>
+          <ImageAvatar img={'Wood067_1k_Color.jpg'} onClick={()=>handleStructureEffect(3)}/>
+        </MuiBox>
         <Typography >blade</Typography>
-        <PrettoSlider
-          valueLabelDisplay="auto"
-          aria-label="pretto angle slider"
-          defaultValue={styleParams.blade_effect}
-          min={0}
-          max={3}
-          onChange={handleBladeEffect}
-        />
-        <Avatar alt="Remy Sharp" src="Wood067_PREVIEW.jpg" />
-        <Avatar alt="Remy Sharp" src="Wood067_PREVIEW.jpg" />
-      </Box>
+        <MuiBox>
+          <ImageAvatar img={'Planks037A_1K_Color.jpg'} onClick={()=>handleBladeEffect(0)}/>
+          <ImageAvatar img={'Wood027_1K_Color.jpg'} onClick={()=>handleBladeEffect(1)}/>
+          <ImageAvatar img={'Wood060_1k_Color.jpg'} onClick={()=>handleBladeEffect(2)}/>
+          <ImageAvatar img={'Wood067_1k_Color.jpg'} onClick={()=>handleBladeEffect(3)}/>
+        </MuiBox>
+
+      </MuiBox>
     </>
    );
 }
